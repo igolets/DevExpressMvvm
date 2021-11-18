@@ -11,3 +11,6 @@ Some external references are from real product and are not included into this re
 - Usage of [XmlSerialiser](https://docs.microsoft.com/en-us/dotnet/api/system.xml.serialization.xmlserializer) with [XSD schemas](https://docs.microsoft.com/en-us/dotnet/standard/serialization/xml-schema-def-tool-gen).
 - Usage of [persistent settings](https://docs.microsoft.com/en-us/dotnet/desktop/winforms/advanced/how-to-write-user-settings-at-run-time-with-csharp?view=netframeworkdesktop-4.8).
 - Usage of [Automapper](https://automapper.org/)
+
+## Author
+Ilya Golets (ilya@golets.ru)
