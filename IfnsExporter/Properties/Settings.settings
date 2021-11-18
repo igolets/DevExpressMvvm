@@ -1,0 +1,51 @@
+﻿<?xml version='1.0' encoding='utf-8'?>
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Cso.IfnsExporter.Properties" GeneratedClassName="Settings">
+  <Profiles />
+  <Settings>
+    <Setting Name="КНД" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1155127</Value>
+    </Setting>
+    <Setting Name="КодНО" Type="System.String" Scope="User">
+      <Value Profile="(Default)">6182</Value>
+    </Setting>
+    <Setting Name="НомерТребования" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">2977</Value>
+    </Setting>
+    <Setting Name="НаимОрг" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Автономная некоммерческая организация центр социального обслуживания населения "Забота"</Value>
+    </Setting>
+    <Setting Name="ИННЮЛ" Type="System.String" Scope="User">
+      <Value Profile="(Default)">6154000000</Value>
+    </Setting>
+    <Setting Name="КПП" Type="System.String" Scope="User">
+      <Value Profile="(Default)">615401001</Value>
+    </Setting>
+    <Setting Name="ПодписантПрПодп" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="ПодписантТлф" Type="System.String" Scope="User">
+      <Value Profile="(Default)">88630000000</Value>
+    </Setting>
+    <Setting Name="ПодписантФамилия" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Фамилия</Value>
+    </Setting>
+    <Setting Name="ПодписантИмя" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Имя</Value>
+    </Setting>
+    <Setting Name="ПодписантОтчество" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Отчество</Value>
+    </Setting>
+    <Setting Name="ConnectionString" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Data Source=(local);Initial Catalog=db;Integrated Security=False;Persist Security Info=True;Pooling=False;User ID=sa;Password=********</Value>
+    </Setting>
+    <Setting Name="OperationName" Type="System.String" Scope="User">
+      <Value Profile="(Default)">Реализация услуг по уходу за больными</Value>
+    </Setting>
+    <Setting Name="ЗаменаНомерДоговора" Type="System.String" Scope="User">
+      <Value Profile="(Default)">-</Value>
+    </Setting>
+    <Setting Name="КодОпер" Type="System.String" Scope="User">
+      <Value Profile="(Default)">1010221</Value>
+    </Setting>
+  </Settings>
+</SettingsFile>
