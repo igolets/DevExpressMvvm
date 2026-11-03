@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using AutoMapper;
 using Cso.BOReports;
 using Cso.BOReports.ServiceReports.ServicesPaymentsReport;
 using Cso.BOReports.Urgent;
@@ -32,134 +31,95 @@ namespace Cso.IfnsExporter.ViewModels
 
         #region Statics
 
-        static MainViewModel()
+        private static DataModel MapCsvToData(CsvModel model) => new()
         {
-            var mappingConfig = new MapperConfiguration(
-                cfg =>
-                {
-                    cfg.CreateMap<CsvModel, DataModel>()
-                        .ForMember(
-                            d => d.OperationDate,
-                            op =>
-                                op.MapFrom(
-                                    s => s.OperationDate.Replace(" г.", "")))
-                        .ForMember(
-                            d => d.BuyerLastName,
-                            op => op.MapFrom(
-                                s => GetLastName(s.BuyerName)))
-                        .ForMember(
-                            d => d.BuyerPatronymicName,
-                            op => op.MapFrom(
-                                s => GetPatronymicName(s.BuyerName)))
-                        .ForMember(
-                            d => d.BuyerFirstName,
-                            op => op.MapFrom(
-                                s => GetFirstName(s.BuyerName)));
+            OperationCode = model.OperationCode,
+            OperationName = model.OperationName,
+            NonTaxableAmount = model.NonTaxableAmount,
+            OperationDate = model.OperationDate.Replace(" г.", ""),
+            BuyerLastName = GetLastName(model.BuyerName),
+            BuyerFirstName = GetFirstName(model.BuyerName),
+            BuyerPatronymicName = GetPatronymicName(model.BuyerName),
+            DocumentName = model.DocumentName,
+            DocumentNumber = model.DocumentNumber
+        };
 
-                    cfg.CreateMap<DataModel, CsvWriteModel>()
-                        .ForMember(
-                            d => d.BuyerName,
-                            op => op.MapFrom(
-                                s => s.GetBuyerFullName()))
-                        .ForMember(d=>d.OperationAmount,
-                            op=>op.MapFrom(
-                                src=>src.NonTaxableAmount))
-                        .ForMember(d=>d.Inn,
-                            op=>op.MapFrom(data=>Settings.Default.ИННЮЛ))
-                        .ForMember(d=>d.Kpp,
-                            op=>op.MapFrom(data=>Settings.Default.КПП));
+        private static CsvWriteModel MapDataToCsvWrite(DataModel model) => new()
+        {
+            OperationCode = model.OperationCode,
+            OperationName = model.OperationName,
+            NonTaxableAmount = model.NonTaxableAmount,
+            OperationAmount = model.NonTaxableAmount,
+            BuyerName = (string)model.GetBuyerFullName(),
+            Inn = Settings.Default.ИННЮЛ,
+            Kpp = Settings.Default.КПП,
+            DocumentName = model.DocumentName,
+            DocumentNumber = model.DocumentNumber,
+            OperationDate = model.OperationDate
+        };
 
-                    cfg.CreateMap<ExportBillsVladimirBindingItem, DataModel>()
-                        .ForMember(
-                            d => d.OperationCode,
-                            op => op.MapFrom(
-                                s => Settings.Default.КодОпер))
-                        .ForMember(
-                            d => d.OperationName,
-                            op => op.MapFrom(
-                                s => Settings.Default.OperationName))
-                        .ForMember(
-                            d => d.NonTaxableAmount,
-                            op => op.MapFrom(
-                                s => s.PaymentReportItem.TotalPaymentAmount))
-                        .ForMember(
-                            d => d.BuyerLastName,
-                            op => op.MapFrom(
-                                s => s.PaymentReportItem.Surname))
-                        .ForMember(
-                            d => d.BuyerFirstName,
-                            op => op.MapFrom(
-                                s => s.PaymentReportItem.Name))
-                        .ForMember(
-                            d => d.BuyerPatronymicName,
-                            op => op.MapFrom(
-                                s => s.PaymentReportItem.Patronimic))
-                        .ForMember(
-                            d => d.DocumentName,
-                            op => op.MapFrom(
-                                s => "договор"))
-                        .ForMember(
-                            d => d.DocumentNumber,
-                            op => op.MapFrom(
-                                s =>
-                                    string.IsNullOrWhiteSpace(Settings.Default.ЗаменаНомерДоговора)
-                                    ? s.ContractNumber
-                                    : Settings.Default.ЗаменаНомерДоговора))
-                        .ForMember(
-                            d => d.OperationDate,
-                            op => op.MapFrom(
-                                s => s.ContractDate.GetValueOrDefault().ToString(DateFormatString)));
+        private static DataModel MapExportBillsToData(ExportBillsVladimirBindingItem model) => new()
+        {
+            OperationCode = Settings.Default.КодОпер,
+            OperationName = Settings.Default.OperationName,
+            NonTaxableAmount = model.PaymentReportItem.TotalPaymentAmount,
+            BuyerLastName = model.PaymentReportItem.Surname,
+            BuyerFirstName = model.PaymentReportItem.Name,
+            BuyerPatronymicName = model.PaymentReportItem.Patronimic,
+            DocumentName = "договор",
+            DocumentNumber = string.IsNullOrWhiteSpace(Settings.Default.ЗаменаНомерДоговора)
+                ? model.ContractNumber
+                : Settings.Default.ЗаменаНомерДоговора,
+            OperationDate = model.ContractDate.GetValueOrDefault().ToString(DateFormatString)
+        };
 
-                    cfg.CreateMap<UrgentExportBillsPeriodBindingItem, DataModel>()
-                        .ForMember(
-                            d => d.OperationCode,
-                            op => op.MapFrom(
-                                s => Settings.Default.КодОпер))
-                        .ForMember(
-                            d => d.OperationName,
-                            op => op.MapFrom(
-                                s => Settings.Default.OperationName))
-                        .ForMember(
-                            d => d.NonTaxableAmount,
-                            op => op.MapFrom(
-                                s => s.PaymentAmount))
-                        .ForMember(
-                            d => d.BuyerLastName,
-                            op => op.MapFrom(
-                                s => s.Surname))
-                        .ForMember(
-                            d => d.BuyerFirstName,
-                            op => op.MapFrom(
-                                s => s.Name))
-                        .ForMember(
-                            d => d.BuyerPatronymicName,
-                            op => op.MapFrom(
-                                s => s.Patronimic))
-                        .ForMember(
-                            d => d.DocumentName,
-                            op => op.MapFrom(
-                                s => "договор"))
-                        .ForMember(
-                            d => d.DocumentNumber,
-                            op => op.MapFrom(
-                                s =>
-                                    string.IsNullOrWhiteSpace(Settings.Default.ЗаменаНомерДоговора)
-                                        ? (s.ContractNumber ?? "б/н")
-                                        : Settings.Default.ЗаменаНомерДоговора))
-                        .ForMember(
-                            d => d.OperationDate,
-                            op => op.MapFrom(
-                                s =>
-                                    s.ContractDate == null
-                                        ? s.FirstServiceDate.ToString(DateFormatString)
-                                        : s.ContractDate.Value.ToString(DateFormatString)));
+        private static DataModel MapUrgentExportToData(UrgentExportBillsPeriodBindingItem model) => new()
+        {
+            OperationCode = Settings.Default.КодОпер,
+            OperationName = Settings.Default.OperationName,
+            NonTaxableAmount = model.PaymentAmount,
+            BuyerLastName = model.Surname,
+            BuyerFirstName = model.Name,
+            BuyerPatronymicName = model.Patronimic,
+            DocumentName = "договор",
+            DocumentNumber = string.IsNullOrWhiteSpace(Settings.Default.ЗаменаНомерДоговора)
+                ? (model.ContractNumber ?? "б/н")
+                : Settings.Default.ЗаменаНомерДоговора,
+            OperationDate = (model.ContractDate ?? model.FirstServiceDate).ToString(DateFormatString)
+        };
 
-                    cfg.CreateMap<Settings, SettingsEditorViewModel>();
+        private static SettingsEditorViewModel MapSettingsToEditor(Settings settings) => new()
+        {
+            ИННЮЛ = settings.ИННЮЛ,
+            КПП = settings.КПП,
+            НаимОрг = settings.НаимОрг,
+            ПодписантТлф = settings.ПодписантТлф,
+            КодНО = settings.КодНО,
+            КНД = settings.КНД,
+            ПодписантОтчество = settings.ПодписантОтчество,
+            ПодписантИмя = settings.ПодписантИмя,
+            ПодписантФамилия = settings.ПодписантФамилия,
+            ConnectionString = settings.ConnectionString,
+            ЗаменаНомерДоговора = settings.ЗаменаНомерДоговора,
+            КодОпер = settings.КодОпер,
+            OperationName = settings.OperationName
+        };
 
-                    cfg.CreateMap<SettingsEditorViewModel, Settings>();
-                }
-            );
-            Mapper = new Mapper(mappingConfig);
+        private static void MapEditorToSettings(SettingsEditorViewModel source, Settings target)
+        {
+            target.ИННЮЛ = source.ИННЮЛ;
+            target.КПП = source.КПП;
+            target.НаимОрг = source.НаимОрг;
+            target.ПодписантТлф = source.ПодписантТлф;
+            target.КодНО = source.КодНО;
+            target.КНД = source.КНД;
+            target.ПодписантОтчество = source.ПодписантОтчество;
+            target.ПодписантИмя = source.ПодписантИмя;
+            target.ПодписантФамилия = source.ПодписантФамилия;
+            target.ConnectionString = source.ConnectionString;
+            target.ЗаменаНомерДоговора = source.ЗаменаНомерДоговора;
+            target.КодОпер = source.КодОпер;
+            target.OperationName = source.OperationName;
         }
 
         private static string GetPatronymicName(string byuerName)
@@ -259,7 +219,7 @@ namespace Cso.IfnsExporter.ViewModels
 
                 foreach (var model in data)
                 {
-                    GridData.Add(Mapper.Map<DataModel>(model));
+                    GridData.Add(MapCsvToData(model));
                 }
 
                 this.RaiseCanExecuteChanged(model=>model.SaveXml());
@@ -324,7 +284,7 @@ namespace Cso.IfnsExporter.ViewModels
             {
                 var fileName = SaveFile.GetFullFileName();
                 var writer = new FileWriter();
-                var data = Mapper.Map<List<CsvWriteModel>>(GridData);
+                var data = GridData.Select(MapDataToCsvWrite).ToList();
                 data.Add(new CsvWriteModel
                 {
                     OperationDate = "Итого:",
@@ -405,7 +365,7 @@ namespace Cso.IfnsExporter.ViewModels
 
                     foreach (var model in data.Where(x => x.PaymentReportItem.TotalPaymentAmount != 0))
                     {
-                        GridData.Add(Mapper.Map<DataModel>(model));
+                        GridData.Add(MapExportBillsToData(model));
                     }
                 }
 
@@ -428,7 +388,7 @@ namespace Cso.IfnsExporter.ViewModels
 
                         foreach (var model in ossoData.Where(x => x.PaymentAmount > 0))
                         {
-                            GridData.Add(Mapper.Map<DataModel>(model));
+                            GridData.Add(MapUrgentExportToData(model));
                         }
                     }
                 }
@@ -462,7 +422,7 @@ namespace Cso.IfnsExporter.ViewModels
 
         public virtual void ShowSettings()
         {
-            var set = Mapper.Map<SettingsEditorViewModel>(Settings.Default);
+            var set = MapSettingsToEditor(Settings.Default);
 
             if (Dialog.ShowDialog(
                 MessageButton.OKCancel,
@@ -470,7 +430,7 @@ namespace Cso.IfnsExporter.ViewModels
                 nameof(SettingsEditorView),
                 set) == MessageResult.OK)
             {
-                Mapper.Map(set, Settings.Default);
+                MapEditorToSettings(set, Settings.Default);
                 Settings.Default.Save();
             }
         }
@@ -499,8 +459,6 @@ namespace Cso.IfnsExporter.ViewModels
                 MessageResult.OK);
         }
         
-        private static readonly IMapper Mapper;
-
         // ReSharper disable once InconsistentNaming
         public static readonly PriodItemModel[] Periods =
         {
